@@ -1,1 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitStats Hub // GitHub Profile Finder</title>
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="Discover GitHub profiles with rich statistics, language charts, top repositories, recent updates, search history, and light/dark theme persistence.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="logo-area">
+                <svg class="logo-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                </svg>
+                <h1>GitStats <span class="accent-text">Hub</span></h1>
+            </div>
+            
+            <div class="header-actions">
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark/light theme">
+                    <!-- Sun Icon (Visible in Dark Mode) -->
+                    <svg class="sun-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <!-- Moon Icon (Visible in Light Mode) -->
+                    <svg class="moon-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search Bar Area -->
+        <section class="search-section">
+            <form id="search-form" class="search-form">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Enter GitHub username... (e.g., octocat, torvalds)" autocomplete="off" required>
+                </div>
+                <button type="submit" class="search-btn">
+                    <span>Search</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </form>
+            
+            <!-- Search History Bar -->
+            <div id="search-history" class="search-history-container hidden">
+                <span class="history-label">Recent:</span>
+                <div id="history-tags" class="history-tags">
+                    <!-- Dynamic tags will render here -->
+                </div>
+                <button id="clear-history" class="clear-history-btn" title="Clear History">Clear</button>
+            </div>
+        </section>
+
+        <!-- Error Container -->
+        <div id="error-container" class="error-container hidden">
+            <div class="error-card">
+                <div class="error-illustration">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3 id="error-title">User Not Found</h3>
+                <p id="error-message">We couldn't find any GitHub user matching that username. Please double-check your spelling and try again.</p>
+            </div>
+        </div>
+
+        <!-- Dashboard Layout (Initially Hidden until loaded) -->
+        <main id="dashboard" class="dashboard-grid hidden">
+            <!-- Sidebar: Profile & Social Info -->
+            <aside class="dashboard-sidebar">
+                <!-- Profile Main Info Card -->
+                <div class="card profile-card animate-fade-in">
+                    <div class="profile-header">
+                        <div class="avatar-wrapper">
+                            <img id="profile-avatar" src="" alt="Profile avatar">
+                        </div>
+                        <div class="profile-title">
+                            <h2 id="profile-name">John Doe</h2>
+                            <span class="profile-username">@<span id="profile-login">johndoe</span></span>
+                        </div>
+                    </div>
+                    
+                    <p id="profile-bio" class="profile-bio">This is where the user bio goes. If no bio is provided, we will show a placeholder.</p>
+                    
+                    <div class="profile-meta">
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span>Joined <span id="profile-joined">Jan 1, 2020</span></span>
+                        </div>
+                        <div class="meta-item" id="meta-location-container">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span id="profile-location">San Francisco, CA</span>
+                        </div>
+                        <div class="meta-item" id="meta-company-container">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                            <span id="profile-company">Company Inc.</span>
+                        </div>
+                        <div class="meta-item" id="meta-blog-container">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg>
+                            <a id="profile-blog" href="#" target="_blank" rel="noopener noreferrer">website.com</a>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <a id="profile-github-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                            <span>GitHub Profile</span>
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                        <button id="copy-link-btn" class="btn btn-secondary">
+                            <span class="btn-text">Copy URL</span>
+                            <svg class="copy-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <svg class="check-icon hidden" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Panel Card -->
+                <div class="card stats-card animate-fade-in delay-1">
+                    <h3>Key Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-icon followers">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-followers">0</span>
+                                <span class="stat-label">Followers</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-box">
+                            <div class="stat-icon following">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="8" cy="7" r="4"></circle>
+                                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-following">0</span>
+                                <span class="stat-label">Following</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-box">
+                            <div class="stat-icon repos">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                                    <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                                    <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-repos">0</span>
+                                <span class="stat-label">Repositories</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area: Charts & Repository Lists -->
+            <section class="dashboard-main">
+                <!-- Language Analysis Card -->
+                <div class="card languages-card animate-fade-in delay-2">
+                    <h3>Language distribution</h3>
+                    <div id="languages-container" class="languages-container">
+                        <!-- Dynamic language bars will render here -->
+                    </div>
+                </div>
+
+                <!-- Repositories Grid Container -->
+                <div class="repos-layout">
+                    <!-- Top Repositories Card -->
+                    <div class="card repos-card animate-fade-in delay-3">
+                        <div class="card-header-with-badge">
+                            <h3>Top Repositories</h3>
+                            <span class="badge">Star Sorted</span>
+                        </div>
+                        <div id="top-repos-list" class="repos-list">
+                            <!-- Dynamic top 5 repos will render here -->
+                        </div>
+                    </div>
+
+                    <!-- Recent Repositories Card -->
+                    <div class="card repos-card animate-fade-in delay-4">
+                        <div class="card-header-with-badge">
+                            <h3>Recent Repositories</h3>
+                            <span class="badge accent">Latest Updates</span>
+                        </div>
+                        <div id="recent-repos-list" class="repos-list">
+                            <!-- Dynamic recent 5 repos will render here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Skeleton Loading State (Shown by default or toggled programmatically) -->
+        <div id="skeleton-loader" class="dashboard-grid skeleton-grid">
+            <aside class="dashboard-sidebar">
+                <div class="card profile-card skeleton-card">
+                    <div class="profile-header">
+                        <div class="avatar-wrapper skeleton-shape circle"></div>
+                        <div class="profile-title" style="flex: 1;">
+                            <div class="skeleton-shape text header" style="width: 70%;"></div>
+                            <div class="skeleton-shape text sub" style="width: 40%;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-shape text body" style="margin-top: 20px; width: 100%;"></div>
+                    <div class="skeleton-shape text body" style="width: 85%;"></div>
+                    <div class="skeleton-meta" style="margin-top: 30px;">
+                        <div class="skeleton-shape text item" style="width: 60%; margin-bottom: 12px;"></div>
+                        <div class="skeleton-shape text item" style="width: 75%; margin-bottom: 12px;"></div>
+                        <div class="skeleton-shape text item" style="width: 50%;"></div>
+                    </div>
+                    <div class="profile-actions" style="margin-top: 30px; display: flex; gap: 12px;">
+                        <div class="skeleton-shape button" style="flex: 1; height: 44px; border-radius: 8px;"></div>
+                        <div class="skeleton-shape button" style="width: 100px; height: 44px; border-radius: 8px;"></div>
+                    </div>
+                </div>
+
+                <div class="card stats-card skeleton-card">
+                    <div class="skeleton-shape text header" style="width: 50%; margin-bottom: 20px;"></div>
+                    <div class="stats-grid">
+                        <div class="stat-box" style="display: flex; gap: 15px; align-items: center;">
+                            <div class="skeleton-shape circle" style="width: 40px; height: 40px;"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton-shape text header" style="width: 30%; height: 18px; margin-bottom: 6px;"></div>
+                                <div class="skeleton-shape text sub" style="width: 60%; height: 10px;"></div>
+                            </div>
+                        </div>
+                        <div class="stat-box" style="display: flex; gap: 15px; align-items: center; margin-top: 15px;">
+                            <div class="skeleton-shape circle" style="width: 40px; height: 40px;"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton-shape text header" style="width: 25%; height: 18px; margin-bottom: 6px;"></div>
+                                <div class="skeleton-shape text sub" style="width: 55%; height: 10px;"></div>
+                            </div>
+                        </div>
+                        <div class="stat-box" style="display: flex; gap: 15px; align-items: center; margin-top: 15px;">
+                            <div class="skeleton-shape circle" style="width: 40px; height: 40px;"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton-shape text header" style="width: 35%; height: 18px; margin-bottom: 6px;"></div>
+                                <div class="skeleton-shape text sub" style="width: 50%; height: 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="dashboard-main">
+                <div class="card languages-card skeleton-card">
+                    <div class="skeleton-shape text header" style="width: 35%; margin-bottom: 25px;"></div>
+                    <div style="display: flex; flex-direction: column; gap: 18px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div class="skeleton-shape text header" style="width: 15%; height: 12px;"></div>
+                                <div class="skeleton-shape text header" style="width: 8%; height: 12px;"></div>
+                            </div>
+                            <div class="skeleton-shape bar" style="height: 8px; width: 100%; border-radius: 4px;"></div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div class="skeleton-shape text header" style="width: 20%; height: 12px;"></div>
+                                <div class="skeleton-shape text header" style="width: 6%; height: 12px;"></div>
+                            </div>
+                            <div class="skeleton-shape bar" style="height: 8px; width: 100%; border-radius: 4px;"></div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div class="skeleton-shape text header" style="width: 12%; height: 12px;"></div>
+                                <div class="skeleton-shape text header" style="width: 10%; height: 12px;"></div>
+                            </div>
+                            <div class="skeleton-shape bar" style="height: 8px; width: 100%; border-radius: 4px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="repos-layout">
+                    <div class="card repos-card skeleton-card">
+                        <div class="skeleton-shape text header" style="width: 50%; margin-bottom: 25px;"></div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="skeleton-repo-item" style="padding: 15px; border: 1px solid var(--border-color, rgba(255,255,255,0.05)); border-radius: 8px;">
+                                <div class="skeleton-shape text header" style="width: 60%; height: 14px; margin-bottom: 8px;"></div>
+                                <div class="skeleton-shape text sub" style="width: 80%; height: 10px; margin-bottom: 12px;"></div>
+                                <div style="display: flex; gap: 12px;">
+                                    <div class="skeleton-shape text sub" style="width: 15%; height: 8px;"></div>
+                                    <div class="skeleton-shape text sub" style="width: 15%; height: 8px;"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-repo-item" style="padding: 15px; border: 1px solid var(--border-color, rgba(255,255,255,0.05)); border-radius: 8px;">
+                                <div class="skeleton-shape text header" style="width: 45%; height: 14px; margin-bottom: 8px;"></div>
+                                <div class="skeleton-shape text sub" style="width: 70%; height: 10px; margin-bottom: 12px;"></div>
+                                <div style="display: flex; gap: 12px;">
+                                    <div class="skeleton-shape text sub" style="width: 15%; height: 8px;"></div>
+                                    <div class="skeleton-shape text sub" style="width: 15%; height: 8px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card repos-card skeleton-card">
+                        <div class="skeleton-shape text header" style="width: 55%; margin-bottom: 25px;"></div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div class="skeleton-repo-item" style="padding: 15px; border: 1px solid var(--border-color, rgba(255,255,255,0.05)); border-radius: 8px;">
+                                <div class="skeleton-shape text header" style="width: 50%; height: 14px; margin-bottom: 8px;"></div>
+                                <div class="skeleton-shape text sub" style="width: 75%; height: 10px; margin-bottom: 12px;"></div>
+                                <div style="display: flex; gap: 12px;">
+                                    <div class="skeleton-shape text sub" style="width: 15%; height: 8px;"></div>
+                                    <div class="skeleton-shape text sub" style="width: 15%; height: 8px;"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-repo-item" style="padding: 15px; border: 1px solid var(--border-color, rgba(255,255,255,0.05)); border-radius: 8px;">
+                                <div class="skeleton-shape text header" style="width: 65%; height: 14px; margin-bottom: 8px;"></div>
+                                <div class="skeleton-shape text sub" style="width: 85%; height: 10px; margin-bottom: 12px;"></div>
+                                <div style="display: flex; gap: 12px;">
+                                    <div class="skeleton-shape text sub" style="width: 15%; height: 8px;"></div>
+                                    <div class="skeleton-shape text sub" style="width: 15%; height: 8px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Made with 💖 & Vanilla Web Tech. Powered by the GitHub REST API.</p>
+        </footer>
+    </div>
+
+    <!-- Script File -->
+    <script src="script.js"></script>
+</body>
+</html>
 
